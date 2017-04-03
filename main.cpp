@@ -14,6 +14,8 @@
 #include "alu.h"
 // to detect the error
 #include "error_detect.h"
+// to implement each stage
+#include "stage.h"
 
 using namespace std;
 
@@ -30,7 +32,6 @@ void Snapshot();
 
 int main()
 {
-    unsigned int addr;
     //Init var
     init();
     //read *.bin
@@ -40,6 +41,7 @@ int main()
     //simulation part
     while(1)
     {
+        /*
         if(error_halt==1) break; //error detect 1.halt 2.error
         Snapshot();
         if(cyc==500001 || PC.cur > 1023) break; //cyc > 500,000
@@ -49,6 +51,8 @@ int main()
         Decode(inst_mem[addr]); //Decode current instruction
         Read_Reg(); //Read the red data and signed immediate( simmediate )
         ALU(); //Implement the instruction meaning
+        */
+
     }
 
     //close *.rpt
@@ -59,6 +63,8 @@ int main()
 
 void init()
 {
+    //Init the Reset var
+    reset = true;
     //Init i-part and d-part mem
     for(int i=0; i<256; i++)
         data_mem[i] = 0;
@@ -75,6 +81,14 @@ void init()
     //Init Error halt detect
     error_halt = 0;
     flag_OVW = true; // true -> correct
+    //Init instruction addr
+    addr = 0;
+    //Init each stage instructions
+    IF_inst = 0; //NOP
+    ID_inst = "NOP";
+    EX_inst = "NOP";
+    DM_inst = "NOP";
+    WB_inst = "NOP";
 
     snapshot.open("snapshot.rpt",ios::out);
     error_dump.open("error_dump.rpt",ios::out);

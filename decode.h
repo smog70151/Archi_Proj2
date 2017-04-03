@@ -11,5 +11,8 @@ using namespace std;
 
 //Decode instruction
 void Decode(unsigned int inst);
+void Get_Inst_name();
+// Signed immediate(16 Bits)
+void Signed();
 
-void PC_ALU();
+void IF_PC_Adder();

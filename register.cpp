@@ -9,25 +9,12 @@
 
 using namespace std;
 
-void Signed();
-
 // Read the data from register
 void Read_Reg()
 {
     /* Read the register */
-
-    read_data1 = reg[rs].cur;
-    read_data2 = reg[rt].cur;
-
-    /* immediate 16 -> 32 signed*/
-    Signed();
-
-}
-
-void Signed()
-{
-    if(immediate&0x00008000)
-        simmediate = immediate | 0xffff0000;
-    else
-        simmediate = immediate & 0x0000ffff;
+    ID_Reg_rs = reg[rs].cur;
+    ID_Reg_rt = reg[rt].cur;
+    /* determine the rs, rt register value equality */
+    isReg_Eq = ~(ID_Reg_rs^ID_Reg_rt);
 }

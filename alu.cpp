@@ -69,10 +69,10 @@ void halt();
 //implement the meaning of the instruction
 void ALU()
 {
-    switch(opcode)
+    switch(EX_opcode)
     {
     case 0x00 :
-        switch(funct)
+        switch(EX_funct)
         {
         case 0x20 : //add $d,$s,$t
             R_add();
@@ -206,14 +206,14 @@ void ALU()
 void R_add()
 {
     //$d = $s + $t
-    reg[rd].cur = read_data1 + read_data2;
+    EX_Reg_rd = EX_Reg_rs + EX_Reg_rt;
     Error_R0(); //detect Write Register[0]
     Error_OVF(); //detect Adder OVF
 }
 void R_addu()
 {
     //$d = $s + $t(unsigned, no overflow exception)
-    reg[rd].cur = read_data1 + read_data2;
+    EX_Reg_rd = EX_Reg_rs + EX_Reg_rt;
     Error_R0(); //detect Write Register[0]
 }
 void R_sub()
@@ -547,5 +547,3 @@ void halt()
     error_halt = 1;
 }
 /* S-Type Instructions */
-
-
