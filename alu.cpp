@@ -12,7 +12,7 @@
 using namespace std;
 
 /* R-Type Instructions */ //17
-//No shamt
+//No EX_shamt
 void R_add();
 void R_addu();
 void R_sub();
@@ -202,7 +202,7 @@ void ALU()
 }
 
 /* R-Type instructions */
-/* No shamt */
+/* No EX_shamt */
 void R_add()
 {
     //$d = $s + $t
@@ -219,44 +219,44 @@ void R_addu()
 void R_sub()
 {
     //$d = $s - $t
-    reg[rd].cur = read_data1 - read_data2;
+    EX_Reg_rd = EX_Reg_rs - EX_Reg_rt;
     Error_R0(); //detect Write Register[0]
     Error_OVF(); //detect Adder OVF
 }
 void R_and()
 {
     //$d = $s & $t
-    reg[rd].cur = read_data1 & read_data2;
+    EX_Reg_rd = EX_Reg_rs & EX_Reg_rt;
     Error_R0(); //detect Write Register[0]
 }
 void R_or()
 {
     //$d = $s | $t
-    reg[rd].cur = read_data1 | read_data2;
+    EX_Reg_rd = EX_Reg_rs | EX_Reg_rt;
     Error_R0(); //detect Write Register[0]
 }
 void R_xor()
 {
     //$d = $s ^ $t
-    reg[rd].cur = read_data1 ^ read_data2;
+    EX_Reg_rd = EX_Reg_rs ^ EX_Reg_rt;
     Error_R0(); //detect Write Register[0]
 }
 void R_nor()
 {
     //$d = ~ ($s | $t)
-    reg[rd].cur = ~(read_data1 | read_data2);
+    EX_Reg_rd = ~(EX_Reg_rs | EX_Reg_rt);
     Error_R0(); //detect Write Register[0]
 }
 void R_nand()
 {
     //$d = ~($s & $t)
-    reg[rd].cur = ~(read_data1 & read_data2);
+    EX_Reg_rd = ~(EX_Reg_rs & EX_Reg_rt);
     Error_R0(); //detect Write Register[0]
 }
 void R_slt()
 {
     //$d = ($s < $t), signed comparison
-    reg[rd].cur = read_data1 < read_data2;
+    EX_Reg_rd = EX_Reg_rs < EX_Reg_rt;
     Error_R0(); //detect Write Register[0]
 }
 
@@ -264,24 +264,21 @@ void R_slt()
 void R_sll()
 {
     //$d = $t << C
-    reg[rd].cur = read_data2 << shamt;
-    if( rt != 0 || rd !=0 || shamt !=0 )
+    EX_Reg_rd = EX_Reg_rt << EX_shamt;
+    if( EX_rt != 0 || EX_rd !=0 || EX_shamt !=0 )
         Error_R0(); //detect Write Register[0]
 }
 void R_srl()
 {
     //$d = $t >> C
-    reg[rd].cur = (unsigned int)read_data2 >> shamt;
+    EX_Reg_rd = (unsigned int)EX_Reg_rt >> EX_shamt;
 
     Error_R0(); //detect Write Register[0]
 }
 void R_sra()
 {
     //$d = $t >> C, with sign bit shifted in
-    if(read_data2 & 0x80000000)
-        reg[rd].cur = (0xffffffff00000000 | (unsigned long long ) read_data2) >> shamt;
-    else
-        reg[rd].cur = read_data2 >> shamt;
+    EX_Reg_rd = EX_Reg_rt >> EX_shamt;
     Error_R0(); //detect Write Register[0]
 }
 
@@ -289,7 +286,7 @@ void R_sra()
 void R_jr()
 {
     //PC=$s
-    PC.cur = read_data1;
+    //PC.cur = EX_Reg_rs;
 }
 
 /* rs and rt */
@@ -298,14 +295,14 @@ void R_mult()
     //{Hi || Lo} = $s * $t
     unsigned long long temp_rs, temp_rt;
     /* Extension signed rs, rt */
-    if(read_data1 &0x80000000)
-        temp_rs = read_data1 | 0xffffffff00000000;
+    if(EX_Reg_rs & 0x80000000)
+        temp_rs = EX_Reg_rs | 0xffffffff00000000;
     else
-        temp_rs = read_data1 & 0x00000000ffffffff;
-    if(read_data2 &0x80000000)
-        temp_rt = read_data2 | 0xffffffff00000000;
+        temp_rs = EX_Reg_rs & 0x00000000ffffffff;
+    if(EX_Reg_rt & 0x80000000)
+        temp_rt = EX_Reg_rt | 0xffffffff00000000;
     else
-        temp_rt = read_data2 & 0x00000000ffffffff;
+        temp_rt = EX_Reg_rt & 0x00000000ffffffff;
     HI.cur = (temp_rs*temp_rt) >> 32;
     LO.cur = (temp_rs*temp_rt) & 0x00000000ffffffff;
     Error_OVW(); //detect OVW HI, LO
@@ -315,8 +312,8 @@ void R_multu()
     //{Hi || Lo} = $s * $t (unsigned, no overflow exception)
     unsigned long long temp_rs, temp_rt;
     /* Extension rs, rt */
-    temp_rs = read_data1 & 0x00000000ffffffff;
-    temp_rt = read_data2 & 0x00000000ffffffff;
+    temp_rs = EX_Reg_rs & 0x00000000ffffffff;
+    temp_rt = EX_Reg_rt & 0x00000000ffffffff;
 
     HI.cur = (temp_rs*temp_rt) >> 32;
     LO.cur = (temp_rs*temp_rt) & 0x00000000ffffffff;
@@ -327,14 +324,14 @@ void R_multu()
 void R_mfhi()
 {
     //$d = Hi
-    reg[rd].cur = HI.cur;
+    EX_Reg_rd = HI.cur;
     Error_R0(); //detect Write Register[0]
     Flag_OVW(); //Flag to detect OVW
 }
 void R_mflo()
 {
     //$d = Lo
-    reg[rd].cur = LO.cur;
+    EX_Reg_rd = LO.cur;
     Error_R0(); //detect Write Register[0]
     Flag_OVW(); //Flag to detect OVW
 }
@@ -345,26 +342,26 @@ void R_mflo()
 void I_addi()
 {
     //$t = $s + C(signed)
-    reg[rt].cur = read_data1 + simmediate;
+    EX_Reg_rd = EX_Reg_rs + EX_simmediate;
     Error_R0(); //detect Write Register[0]
     Error_OVF(); //detect Adder OVF
 }
 void I_addiu()
 {
     //$t = $s + C(unsigned, no overflow exception)
-    reg[rt].cur = read_data1 + simmediate;
+    EX_Reg_rd = EX_Reg_rs + EX_simmediate;
     Error_R0(); //detect Write Register[0]
 }
 void I_lw()
 {
     //$t = 4 bytes from Memory[$s + C(signed)]
     int addr;
-    addr = read_data1 + simmediate;
+    addr = EX_Reg_rs + EX_simmediate;
     if(0<=addr&&addr<=1020)
-        reg[rt].cur = (data_mem[addr  ] << 24)
-                    + (data_mem[addr+1] << 16)
-                    + (data_mem[addr+2] <<  8)
-                    + (data_mem[addr+3]      );
+        EX_Reg_rd = (data_mem[addr  ] << 24)
+                  + (data_mem[addr+1] << 16)
+                  + (data_mem[addr+2] <<  8)
+                  + (data_mem[addr+3]      );
     Error_R0(); //detect Write Register[0]
     Error_OVF(); //detect Adder OVF
     Error_Dmem(addr); //detect D Memory OVF
@@ -375,13 +372,13 @@ void I_lh()
 {
     //$t = 2 bytes from Memory[$s + C(signed)], signed
     int addr;
-    addr = read_data1 + simmediate;
+    addr = EX_Reg_rs + EX_simmediate;
     if(0<=addr&&addr<=1022)
     {
-        reg[rt].cur = (data_mem[addr  ] << 8)
+        EX_Reg_rd = (data_mem[addr  ] << 8)
                     + (data_mem[addr+1]     );
-        if( reg[rt].cur & 0x00008000 )
-            reg[rt].cur = reg[rt].cur | 0xffff0000;
+        if( EX_Reg_rd & 0x00008000 )
+            EX_Reg_rd = EX_Reg_rd | 0xffff0000;
     }
     Error_R0(); //detect Write Register[0]
     Error_OVF(); //detect Adder OVF
@@ -392,9 +389,9 @@ void I_lhu()
 {
     //$t = 2 bytes from Memory[$s + C(signed)], unsigned
     int addr;
-    addr = read_data1 + simmediate;
+    addr = EX_Reg_rs + EX_simmediate;
     if(0<=addr&&addr<=1022)
-        reg[rt].cur = (data_mem[addr  ] << 8)
+        EX_Reg_rd = (data_mem[addr  ] << 8)
                     + (data_mem[addr+1]     );
     Error_R0(); //detect Write Register[0]
     Error_OVF(); //detect Adder OVF
@@ -405,12 +402,12 @@ void I_lb()
 {
     //$t = Memory[$s + C(signed)], signed
     int addr;
-    addr = read_data1 + simmediate;
+    addr = EX_Reg_rs + EX_simmediate;
     if(0<=addr&&addr<=1023)
     {
-        reg[rt].cur = data_mem[addr];
-        if( reg[rt].cur & 0x00000080 )
-            reg[rt].cur = reg[rt].cur | 0xffffff00;
+        EX_Reg_rd = data_mem[addr];
+        if( EX_Reg_rd & 0x00000080 )
+            EX_Reg_rd = EX_Reg_rd | 0xffffff00;
     }
     Error_R0(); //detect Write Register[0]
     Error_OVF(); //detect Adder OVF
@@ -421,9 +418,9 @@ void I_lbu()
 {
     //$t = Memory[$s + C(signed)], unsigned
     int addr;
-    addr = read_data1 + simmediate;
+    addr = EX_Reg_rs + EX_simmediate;
     if(0<=addr&&addr<=1023)
-        reg[rt].cur = data_mem[addr];
+        EX_Reg_rd = data_mem[addr];
     Error_R0(); //detect Write Register[0]
     Error_OVF(); //detect Adder OVF
     Error_Dmem(addr); //detect D Memory OVF
@@ -433,13 +430,13 @@ void I_sw()
 {
     //4 bytes from Memory[$s + C(signed)] = $t
     int addr;
-    addr = read_data1 + simmediate;
+    addr = EX_Reg_rs + EX_simmediate;
     if(0<=addr&&addr<=1020)
     {
-        data_mem[addr  ] = (reg[rt].cur >> 24) & 0x000000ff;
-        data_mem[addr+1] = (reg[rt].cur >> 16) & 0x000000ff;
-        data_mem[addr+2] = (reg[rt].cur >>  8) & 0x000000ff;
-        data_mem[addr+3] = (reg[rt].cur      ) & 0x000000ff;
+        data_mem[addr  ] = (EX_Reg_rd >> 24) & 0x000000ff;
+        data_mem[addr+1] = (EX_Reg_rd >> 16) & 0x000000ff;
+        data_mem[addr+2] = (EX_Reg_rd >>  8) & 0x000000ff;
+        data_mem[addr+3] = (EX_Reg_rd      ) & 0x000000ff;
     }
     Error_OVF(); //detect Adder OVF
     Error_Dmem(addr); //detect D Memory OVF
@@ -449,11 +446,11 @@ void I_sh()
 {
     //2 bytes from Memory[$s + C(signed)] = $t & 0x0000FFFF
     int addr;
-    addr = read_data1 + simmediate;
+    addr = EX_Reg_rs + EX_simmediate;
     if(0<=addr&&addr<=1022)
     {
-        data_mem[addr  ] = (reg[rt].cur >>  8) & 0x000000ff;
-        data_mem[addr+1] = (reg[rt].cur      ) & 0x000000ff;
+        data_mem[addr  ] = (EX_Reg_rd >>  8) & 0x000000ff;
+        data_mem[addr+1] = (EX_Reg_rd      ) & 0x000000ff;
     }
     Error_OVF(); //detect Adder OVF
     Error_Dmem(addr); //detect D Memory OVF
@@ -463,9 +460,9 @@ void I_sb()
 {
     //Memory[$s + C(signed)] = $t & 0x000000FF
     int addr;
-    addr = read_data1 + simmediate;
+    addr = EX_Reg_rs + EX_simmediate;
     if(0<=addr&&addr<=1023)
-        data_mem[addr  ] = (reg[rt].cur      ) & 0x000000ff;
+        data_mem[addr  ] = (EX_Reg_rd      ) & 0x000000ff;
     Error_OVF(); //detect Adder OVF
     Error_Dmem(addr); //detect D Memory OVF
     Error_Misaligned(addr); //detect S/L Wrong Memory
@@ -473,57 +470,57 @@ void I_sb()
 void I_lui()
 {
     //$t = C << 16
-    reg[rt].cur = immediate << 16;
+    EX_Reg_rd = EX_immediate << 16;
     Error_R0(); //detect Write Register[0]
 }
 void I_andi()
 {
     //$t = $s & C(unsigned)
-    reg[rt].cur = read_data1 & immediate;
+    EX_Reg_rd = EX_Reg_rs & EX_immediate;
     Error_R0(); //detect Write Register[0]
 }
 void I_ori()
 {
     //$t = $s | C(unsigned)
-    reg[rt].cur = read_data1 | immediate;
+    EX_Reg_rd = EX_Reg_rs | EX_immediate;
     Error_R0(); //detect Write Register[0]
 }
 void I_nori()
 {
     //$t = ~($s | C(unsigned))
-    reg[rt].cur = ~(read_data1 | immediate);
+    EX_Reg_rd = ~(EX_Reg_rs | EX_immediate);
     Error_R0(); //detect Write Register[0]
 }
 void I_slti()
 {
     //$t = ($s < C(signed) ), signed comparison
-    reg[rt].cur = read_data1 < simmediate;
+    EX_Reg_rd = EX_Reg_rs < EX_simmediate;
     Error_R0(); //detect Write Register[0]
 }
 void I_beq()
 {
     //if ($s == $t) go to PC+4+4*C(signed)
-    if( read_data1 == read_data2 )
+    if( EX_Reg_rs == EX_Reg_rt )
     {
-        PC.cur = PC.cur + ( simmediate << 2 );
+        PC.cur = PC.cur + ( EX_simmediate << 2 );
     }
     Error_OVF(); //detect Adder OVF
 }
 void I_bne()
 {
     //if ($s != $t) go to PC+4+4*C(signed)
-    if( read_data1 != read_data2 )
+    if( EX_Reg_rs != EX_Reg_rt )
     {
-        PC.cur = PC.cur + ( simmediate << 2 );
+        PC.cur = PC.cur + ( EX_simmediate << 2 );
     }
     Error_OVF(); //detect Adder OVF
 }
 void I_bgtz()
 {
     //if ($s > 0) go to PC+4+4*C(signed)
-    if( read_data1 > 0)
+    if( EX_Reg_rs > 0)
     {
-        PC.cur = PC.cur + ( simmediate << 2 );
+        PC.cur = PC.cur + ( EX_simmediate << 2 );
     }
     Error_OVF(); //detect Adder OVF
 }
@@ -532,12 +529,12 @@ void I_bgtz()
 /* J-Type Instructions */
 void J_j()
 {
-    PC.cur = ( PC.cur >> 27 ) | ( immediate << 2 );
+    PC.cur = ( PC.cur >> 27 ) | ( EX_immediate << 2 );
 }
 void J_jal()
 {
     reg[31].cur = PC.cur;
-    PC.cur = ( PC.cur >> 27 ) | ( immediate << 2 );
+    PC.cur = ( PC.cur >> 27 ) | ( EX_immediate << 2 );
 }
 /* J-Type Instructions */
 

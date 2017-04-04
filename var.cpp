@@ -56,16 +56,16 @@ unsigned int IF_inst;
 string ID_inst;
 unsigned int ID_instruction;
 bool ID_Flag_PC;
-unsigned int ID_Reg_rs;
-unsigned int ID_Reg_rt;
+int ID_Reg_rs, ID_Reg_rt;
 bool isReg_Eq;
 /* Control Signal */
 bool IF_Flush;
 bool ID_Flush;
 bool EX_Flush;
+
 /* EX Stage */
 string EX_inst;
-unsigned int EX_Reg_rs, EX_Reg_rt, EX_Reg_rd;
+int EX_Reg_rs, EX_Reg_rt, EX_Reg_rd;
 int EX_rs, EX_rt, EX_rd, EX_shamt;
 unsigned int EX_opcode, EX_funct;
 unsigned int EX_immediate;

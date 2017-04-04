@@ -71,6 +71,7 @@ extern unsigned int IF_inst;
 extern string ID_inst;
 extern unsigned int ID_instruction;
 extern bool ID_Flag_PC;
+extern int ID_Reg_rs, ID_Reg_rt;
 extern bool isReg_Eq;
 //Control
 extern bool IF_Flush;
@@ -79,7 +80,7 @@ extern bool EX_Flush;
 
 /* EX Stage */
 extern string EX_inst;
-extern unsigned int EX_Reg_rs, EX_Reg_rt, EX_Reg_rd;
+extern int EX_Reg_rs, EX_Reg_rt, EX_Reg_rd;
 extern int EX_rs, EX_rt, EX_rd, EX_shamt;
 extern unsigned int EX_opcode, EX_funct;
 extern unsigned int EX_immediate;
