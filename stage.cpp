@@ -55,7 +55,10 @@ void Stage_EX()
     EX_Mux_rd(); // to determine which register save the value
     ALU();
 }
-void Stage_DM();
+void Stage_DM()
+{
+    
+}
 void Stage_WB();
 
 /* IF section */

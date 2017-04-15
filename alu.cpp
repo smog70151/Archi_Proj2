@@ -518,10 +518,8 @@ void I_bne()
 void I_bgtz()
 {
     //if ($s > 0) go to PC+4+4*C(signed)
-    if( EX_Reg_rs > 0)
-    {
-        PC.cur = PC.cur + ( EX_simmediate << 2 );
-    }
+    //if( EX_Reg_rs > 0)
+    //    PC.cur = PC.cur + ( EX_simmediate << 2 );
     Error_OVF(); //detect Adder OVF
 }
 /* I-Type Instructions */
@@ -529,12 +527,12 @@ void I_bgtz()
 /* J-Type Instructions */
 void J_j()
 {
-    PC.cur = ( PC.cur >> 27 ) | ( EX_immediate << 2 );
+    //PC.cur = ( PC.cur >> 27 ) | ( EX_immediate << 2 );
 }
 void J_jal()
 {
     reg[31].cur = PC.cur;
-    PC.cur = ( PC.cur >> 27 ) | ( EX_immediate << 2 );
+    //PC.cur = ( PC.cur >> 27 ) | ( EX_immediate << 2 );
 }
 /* J-Type Instructions */
 

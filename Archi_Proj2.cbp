@@ -32,7 +32,19 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="alu.cpp" />
+		<Unit filename="alu.h" />
+		<Unit filename="decode.cpp" />
+		<Unit filename="decode.h" />
+		<Unit filename="error_detect.cpp" />
+		<Unit filename="error_detect.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="register.cpp" />
+		<Unit filename="register.h" />
+		<Unit filename="stage.cpp" />
+		<Unit filename="stage.h" />
+		<Unit filename="var.cpp" />
+		<Unit filename="var.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

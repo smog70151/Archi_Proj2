@@ -18,3 +18,9 @@ void Read_Reg()
     /* determine the rs, rt register value equality */
     isReg_Eq = ~(ID_Reg_rs^ID_Reg_rt);
 }
+
+void Write_Reg()
+{
+  /* DM Stage */
+
+}
