@@ -59,6 +59,9 @@ extern string Inst_WB;
 
 // Stage WB
 extern int WB_rd;
+extern int WB_ALU_outcome;
+extern int WB_Memory_data;
+extern int WB_Forward_data;
 
 // Stage DM
 extern int DM_ALU_outcome;

@@ -4,6 +4,7 @@
 #include <string>
 #include <stdlib.h>
 #include <cstdlib>
+#include <sstream>
 // to include the var
 #include "var.h"
 // to decode the instruction
@@ -15,11 +16,14 @@
 // to detect the error
 #include "error_detect.h"
 
+
 void Stage_WB()
 {
     IF_info = ID_info = EX_info = ""; // Init the Info of each stage
     Inst_WB = Inst_DM; // DFF D4( clk, DM, WB)
     WB_rd = DM_rd; // register destination
+    WB_ALU_outcome = DM_ALU_outcome; // DFF
+    WB_Memory_data = DM_Memory_data; // DFF
      /* R - Type WB instruction */
     if ( Inst_WB == "ADD"  || Inst_WB == "ADDU" || Inst_WB == "SUB"  ||
          Inst_WB == "AND"  || Inst_WB == "OR"   || Inst_WB == "XOR"  ||
@@ -27,18 +31,18 @@ void Stage_WB()
          Inst_WB == "SLL"  || Inst_WB == "SRL"  || Inst_WB == "SRA"  ||
          Inst_WB == "ADD"  )
     {
-        reg[WB_rd].cur = DM_ALU_outcome; // R-type data rd <- data ( arithmetic )
+        WB_Forward_data = reg[WB_rd].cur = DM_ALU_outcome; // R-type data rd <- data ( arithmetic )
         Error_R0();
     }
     else if ( Inst_WB == "MFHI" )
     {
-        reg[WB_rd].cur = DM_HI;
+        WB_Forward_data = reg[WB_rd].cur = DM_HI;
         Error_R0();
         Flag_OVW();
     }
     else if ( Inst_WB == "MFLO" )
     {
-        reg[WB_rd].cur = DM_LO;
+        WB_Forward_data = reg[WB_rd].cur = DM_LO;
         Error_R0();
         Flag_OVW();
     }
@@ -46,18 +50,18 @@ void Stage_WB()
               Inst_WB == "ANDI" || Inst_WB == "ORI"   || Inst_WB == "NORI" ||
               Inst_WB == "SLTI" )
     {
-        reg[WB_rd].cur = DM_ALU_outcome; // I-type data rd <- data ( arithmetic )
+        WB_Forward_data = reg[WB_rd].cur = DM_ALU_outcome; // I-type data rd <- data ( arithmetic )
         Error_R0();
     }
     else if ( Inst_WB == "LW" || Inst_WB == "LH" || Inst_WB == "LHU" ||
               Inst_WB == "LB" || Inst_WB == "LBU" )
     {
-        reg[WB_rd].cur = DM_Memory_data; // I-type data rd <- data ( memory )
+        WB_Forward_data = reg[WB_rd].cur = DM_Memory_data; // I-type data rd <- data ( memory )
         Error_R0();
     }
     else if ( Inst_WB == "JAL" )
     {
-        reg[WB_rd].cur = DM_PC; // Register 32
+        WB_Forward_data = reg[WB_rd].cur = DM_PC; // Register 32
         Error_R0();
     }
     else
@@ -78,19 +82,6 @@ void Stage_DM()
     // Write memory
     if ( Inst_DM == "SW" )
     {
-        // if( WB_rd == DM_rt ) // Fowarding DM/WB -> DM
-        // {
-        //     if( 0 <= EX_ALU_outcome && EX_ALU_outcome <= 1020 )
-        //     {
-        //         data_mem[EX_ALU_outcome  ] = (reg[WB_rd].cur >> 24) & 0x000000ff;
-        //         data_mem[EX_ALU_outcome+1] = (reg[WB_rd].cur >> 16) & 0x000000ff;
-        //         data_mem[EX_ALU_outcome+2] = (reg[WB_rd].cur >>  8) & 0x000000ff;
-        //         data_mem[EX_ALU_outcome+3] = (reg[WB_rd].cur      ) & 0x000000ff;
-        //
-        //     }
-        // }
-        // else
-        // {
         if( 0 <= EX_ALU_outcome && EX_ALU_outcome <= 1020 )
         {
             data_mem[EX_ALU_outcome  ] = (reg[EX_rt].cur >> 24) & 0x000000ff;
@@ -98,44 +89,24 @@ void Stage_DM()
             data_mem[EX_ALU_outcome+2] = (reg[EX_rt].cur >>  8) & 0x000000ff;
             data_mem[EX_ALU_outcome+3] = (reg[EX_rt].cur      ) & 0x000000ff;
         }
-        // }
         Error_Dmem(Inst_DM, DM_ALU_outcome);
         Error_Misaligned(Inst_DM, DM_ALU_outcome);
     }
     else if ( Inst_DM == "SH" )
     {
-        // if( WB_rd == DM_rt ) // Fowarding DM/WB -> DM
-        // {
-        //     if( 0 <= EX_ALU_outcome && EX_ALU_outcome <= 1022 )
-        //     {
-        //         data_mem[EX_ALU_outcome  ] = (reg[WB_rd].cur >>  8) & 0x000000ff;
-        //         data_mem[EX_ALU_outcome+1] = (reg[WB_rd].cur      ) & 0x000000ff;
-        //     }
-        // }
-        // else
-        // {
         if( 0 <= EX_ALU_outcome && EX_ALU_outcome <= 1022 )
         {
             data_mem[EX_ALU_outcome  ] = (reg[EX_rt].cur >>  8) & 0x000000ff;
             data_mem[EX_ALU_outcome+1] = (reg[EX_rt].cur      ) & 0x000000ff;
         }
-        // }
         Error_Dmem(Inst_DM, DM_ALU_outcome);
         Error_Misaligned(Inst_DM, DM_ALU_outcome);
     }
     else if ( Inst_DM == "SB" )
     {
-        // if( WB_rd == DM_rt )
-        // {
-        //     if( 0 <= EX_ALU_outcome && EX_ALU_outcome <= 1023 )
-        //         data_mem[EX_ALU_outcome  ] = (reg[WB_rd].cur      ) & 0x000000ff;
-        // }
-        // else
-        // {
         if( 0 <= EX_ALU_outcome && EX_ALU_outcome <= 1023 )
             data_mem[EX_ALU_outcome  ] = (reg[EX_rt].cur      ) & 0x000000ff;
         Error_Dmem(Inst_DM, DM_ALU_outcome);
-        // }
     }
     else if ( Inst_DM == "LW" )
     {
@@ -194,10 +165,29 @@ void Stage_EX()
          Inst_DM == "SLTI" || Inst_DM == "JAL")
     {
         /* Fowarding */
+        sstream srs, srt;
+        srs << rs;
+        srt << rt;
         if( DM_rd == rs )
+        {
             ALU_rs_value = DM_ALU_outcome;
+            EX_info = EX_info + " fwd_EX-DM_rs_$" + srs.str();
+        }
+        else if ( WB_rd == rs )
+        {
+            ALU_rs_value = WB_Forward_data;
+            EX_info = EX_info + " fwd_EX-DM_rs_$" + srs.str();
+        }
         if( DM_rd == rt)
+        {
             ALU_rt_value = DM_ALU_outcome;
+            EX_info = EX_info + " fwd_EX-DM_rt_$" + srt.str();
+        }
+        else if ( WB_rd == rt)
+        {
+            ALU_rt_value = WB_Forward_data;
+            EX_info = EX_info + " fwd_EX-DM_rt_$" + srt.str();
+        }
     }
     ALU();
 }
@@ -221,6 +211,8 @@ void Stage_ID()
         if( Inst_EX == "LW" || Inst_EX == "LH" || Inst_EX == "LHU" ||
             Inst_EX == "LB" || Inst_EX == "LBU" )
         {
+            ID_info = " to_be_stalled";
+            IF_info = " to_be_stalled";
             isIDStalled = true;
             isIFStalled = true;
             return;
@@ -228,6 +220,8 @@ void Stage_ID()
         if( Inst_DM == "LW" || Inst_DM == "LH" || Inst_DM == "LHU" ||
             Inst_DM == "LB" || Inst_DM == "LBU" )
         {
+            ID_info = " to_be_stalled";
+            IF_info = " to_be_stalled";
             isIDStalled = true;
             isIFStalled = true;
             return;
@@ -246,16 +240,26 @@ void Stage_ID()
          Inst_DM == "SLTI" || Inst_DM == "JAL")
     {
         /* Fowarding */
+        sstream srs, srt;
+        srs << rs;
+        srs << rt;
         if( DM_rd == rs )
+        {
             ID_rs_value = DM_ALU_outcome;
+            ID_info = ID_info + "fwd_EX-DM_rs_$" + srs.str(); 
+        }
         if( DM_rd == rt)
+        {
             ID_rt_value = DM_ALU_outcome;
+            ID_info = ID_info + "fwd_EX-DM_rt_$" + srt.str();
+        }
     }
     if( Inst_ID == "BEQ" )
     {
 
         if ( ID_rs_value == ID_rt_value )
         {
+            IF_info = " to_be_flushed";
             isFlushed = true;
             ID_PC = PC.cur + 4 + (simmediate<<2);
         }
@@ -265,6 +269,7 @@ void Stage_ID()
     {
         if( ID_rs_value != ID_rt_value )
         {
+            IF_info = " to_be_flushed";
             isFlushed = true;
             ID_PC = PC.cur + 4 + (simmediate<<2);
         }
@@ -274,6 +279,7 @@ void Stage_ID()
     {
         if ( ID_rs_value > 0 )
         {
+            IF_info = " to_be_flushed";
             isFlushed = true;
             ID_PC = PC.cur + 4 + (simmediate<<2);
         }
@@ -281,18 +287,21 @@ void Stage_ID()
     }
     if( Inst_ID == "JR" )
     {
+        IF_info = " to_be_flushed";
         isFlushed = true;
         ID_PC = ID_rs_value;
         return;
     }
     if( Inst_ID == "J" )
     {
+        IF_info = " to_be_flushed";
         isFlushed = true;
         ID_PC = ((PC.cur+4)>>27) | (immediate<<2);
         return;
     }
     if( Inst_ID == "JAL" )
     {
+        IF_info = " to_be_flushed";
         isFlushed = true;
         ID_PC = ((PC.cur+4)>>27) | (immediate<<2);
         return;

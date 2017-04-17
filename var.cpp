@@ -54,6 +54,9 @@ string Inst_WB;
 
 // Stage WB
 int WB_rd;
+int WB_ALU_outcome;
+int WB_Memory_data;
+int WB_Forward_data;
 
 // Stage DM
 int DM_ALU_outcome;
