@@ -24,6 +24,7 @@ void Decode(unsigned int inst)
         simmediate = immediate | 0xffff0000;
     else
         simmediate = immediate & 0x0000ffff;
+    ID_rd = rt;
 
     switch(opcode)
     {
@@ -32,41 +33,53 @@ void Decode(unsigned int inst)
         {
         case 0x20 : //add $d,$s,$t
             Inst_ID = "ADD";
+            ID_rd = rd;
         break;
         case 0x21 : //addu $d,$s,$t
             Inst_ID = "ADDU";
+            ID_rd = rd;
         break;
         case 0x22 : //sub $d,$s,$t
             Inst_ID = "SUB";
+            ID_rd = rd;
         break;
         case 0x24 : //and $d,$s,$t
             Inst_ID = "AND";
+            ID_rd = rd;
         break;
         case 0x25 : //or $d,$s,$t
             Inst_ID = "OR";
+            ID_rd = rd;
         break;
         case 0x26 : //xor $d,$s,$t
             Inst_ID = "XOR";
+            ID_rd = rd;
         break;
         case 0x27 : //nor $d,$s,$t
             Inst_ID = "NOR";
+            ID_rd = rd;
         break;
         case 0x28 : //nand $d,$s,$t
             Inst_ID = "NAND";
+            ID_rd = rd;
         break;
         case 0x2a : //slt $d,$s,$t
             Inst_ID = "SLT";
+            ID_rd = rd;
         break;
         case 0x00 : //sll $d,$t,C
             Inst_ID = "SLL";
             if ( rt == 0 && rs == 0 )
                 Inst_ID = "NOP";
+            ID_rd = rd;
         break;
         case 0x02 : //srl $d,$t,C
             Inst_ID = "SRL";
+            ID_rd = rd;
         break;
         case 0x03 : //sra $d,$t,C
             Inst_ID = "SRA";
+            ID_rd = rd;
         break;
         case 0x08 : //jr $s
             Inst_ID = "JR";
@@ -79,9 +92,11 @@ void Decode(unsigned int inst)
         break;
         case 0x10 : //mfhi $d
             Inst_ID = "MFHI";
+            ID_rd = rd;
         break;
         case 0x12 : //mflo $d
             Inst_ID = "MFLO";
+            ID_rd = rd;
         break;
         default :
             cout << "illegal instruction found at 0xaddress" ;

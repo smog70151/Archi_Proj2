@@ -57,8 +57,8 @@ int main()
         // Error
         // 5 Halt instruction
         if(error_halt==1) break;
-        if(((Inst_IF&0xfc000000)==0xfc000000) && Inst_WB == "HALT" && Inst_DM == "HALT" && Inst_EX == "HALT" && Inst_ID == "HALT") break;
         Snapshot();
+        if(((Inst_IF&0xfc000000)==0xfc000000) && Inst_WB == "HALT" && Inst_DM == "HALT" && Inst_EX == "HALT" && Inst_ID == "HALT") break;
         if(cyc==500001 || PC.cur > 1023) break; // cyc > 500,000 || PC addr OVF
         cyc++; //cycle ++;
     }
@@ -87,6 +87,9 @@ void init()
     //Init Error halt detect
     error_halt = 0;
     flag_OVW = true; // true -> correct
+    //Init inst
+    Inst_WB = Inst_DM = Inst_EX = Inst_ID = "NOP";
+    Inst_IF = 0x00000000;
 
     snapshot.open("snapshot.rpt",ios::out);
     error_dump.open("error_dump.rpt",ios::out);
@@ -105,7 +108,8 @@ void read_iimage()
         iimage.read((char*)&c,sizeof(char));
         inst=c2i_inst_data(inst,4-i,c);
     }
-    PC.cur = inst; // write into pc
+    PC.pre = PC.cur = inst; // write into pc
+    // cout << setw(8) << hex << PC.cur << endl;
 
     // numbers of instruction
     for(int i=0; i<4; i++)
@@ -220,11 +224,13 @@ void Snapshot()
             snapshot << "$" << setw(2) << setfill('0') << dec << i << ": 0x" << setw(8) << setfill('0') << hex << uppercase << reg[i].cur << endl;
         snapshot << "$HI: 0x" << setw(8) << setfill('0') << hex << uppercase << HI.cur << endl;
         snapshot << "$LO: 0x" << setw(8) << setfill('0') << hex << uppercase << LO.cur << endl;
-        snapshot << "PC: 0x" << setw(8) << setfill('0') << hex << uppercase << PC.cur << endl;
+        snapshot << "PC: 0x" << setw(8) << setfill('0') << hex << uppercase << IF_PC << endl;
     }
     else //snapshot every cyc
     {
         //snapshot the altered reg
+        // cout << "$" << setw(2) << setfill('0') << dec << "2" << ": 0x" << setw(8) << setfill('0') << hex << uppercase << reg[2].cur << endl;
+        // cout << "$" << setw(2) << setfill('0') << dec << "2" << ": 0x" << setw(8) << setfill('0') << hex << uppercase << reg[2].pre << endl;
         for(int i = 0; i<32; i++)
             if(reg[i].pre != reg[i].cur)
                 snapshot << "$" << setw(2) << setfill('0') << dec << i << ": 0x" << setw(8) << setfill('0') << hex << uppercase << reg[i].cur << endl;
@@ -232,8 +238,7 @@ void Snapshot()
             snapshot << "$HI: 0x" << setw(8) << setfill('0') << hex << uppercase << HI.cur << endl;
         if(LO.pre!=LO.cur)
             snapshot << "$LO: 0x" << setw(8) << setfill('0') << hex << uppercase << LO.cur << endl;
-        if(PC.pre!=PC.cur)
-            snapshot << "PC: 0x" << setw(8) << setfill('0') << hex << uppercase << PC.cur << endl;
+            snapshot << "PC: 0x" << setw(8) << setfill('0') << hex << uppercase << IF_PC << endl;
     }
     snapshot << "IF: 0x" << setw(8) << setfill('0') << hex << uppercase << Inst_IF << IF_info << endl;
     snapshot << "ID: " << Inst_ID << ID_info << endl;

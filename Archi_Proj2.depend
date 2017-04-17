@@ -9,7 +9,7 @@
 	"var.h"
 	"error_detect.h"
 
-1492421161 d:\users\user\desktop\nthu\105_2nd_semester\archi\project 2\archi_proj2\var.h
+1492442925 d:\users\user\desktop\nthu\105_2nd_semester\archi\project 2\archi_proj2\var.h
 	<iostream>
 	<fstream>
 	<string>
@@ -24,7 +24,7 @@
 	<cstdlib>
 	"var.h"
 
-1492355178 source:d:\users\user\desktop\nthu\105_2nd_semester\archi\project 2\archi_proj2\decode.cpp
+1492440543 source:d:\users\user\desktop\nthu\105_2nd_semester\archi\project 2\archi_proj2\decode.cpp
 	<iostream>
 	<iomanip>
 	<fstream>
@@ -42,7 +42,7 @@
 	<cstdlib>
 	"var.h"
 
-1492421058 source:d:\users\user\desktop\nthu\105_2nd_semester\archi\project 2\archi_proj2\main.cpp
+1492443986 source:d:\users\user\desktop\nthu\105_2nd_semester\archi\project 2\archi_proj2\main.cpp
 	<iostream>
 	<iomanip>
 	<fstream>
@@ -106,7 +106,7 @@
 	<cstdlib>
 	"var.h"
 
-1492421131 source:d:\users\user\desktop\nthu\105_2nd_semester\archi\project 2\archi_proj2\stage.cpp
+1492443818 source:d:\users\user\desktop\nthu\105_2nd_semester\archi\project 2\archi_proj2\stage.cpp
 	<iostream>
 	<iomanip>
 	<fstream>
@@ -120,7 +120,7 @@
 	"alu.h"
 	"error_detect.h"
 
-1492421116 source:d:\users\user\desktop\nthu\105_2nd_semester\archi\project 2\archi_proj2\var.cpp
+1492442932 source:d:\users\user\desktop\nthu\105_2nd_semester\archi\project 2\archi_proj2\var.cpp
 	<iostream>
 	<fstream>
 	<string>

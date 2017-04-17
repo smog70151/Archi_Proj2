@@ -78,9 +78,11 @@ int ID_rs_value, ID_rt_value;
 int ID_PC;
 bool isIDStalled;
 bool isFlushed;
+unsigned int Inst_ID_value;
 
 // Stage IF
 bool isIFStalled;
+bool isIFStoped;
 int IF_PC;
 
 // String to detect stall / flush / foward

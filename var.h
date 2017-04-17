@@ -83,9 +83,11 @@ extern int ID_rs_value, ID_rt_value;
 extern bool isIDStalled;
 extern bool isFlushed;
 extern int ID_PC;
+extern unsigned int Inst_ID_value;
 
 // Stage IF
 extern bool isIFStalled;
+extern bool isIFStoped;
 extern int IF_PC;
 
 // String to detect stall / flush / foward

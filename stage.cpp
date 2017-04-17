@@ -57,6 +57,9 @@ void Stage_WB()
               Inst_WB == "LB" || Inst_WB == "LBU" )
     {
         WB_Forward_data = reg[WB_rd].cur = DM_Memory_data; // I-type data rd <- data ( memory )
+        // cout << setw(2) << dec << DM_rd << endl;
+        // cout << setw(8) << hex << reg[WB_rd].cur << endl;
+        // cout << setw(8) << hex << reg[WB_rd].pre << endl;
         Error_R0();
     }
     else if ( Inst_WB == "JAL" )
@@ -198,12 +201,14 @@ void Stage_ID()
     {
         isIDStalled = false;
         isFlushed = false;
-        return;
+        Inst_ID_value = Inst_ID_value;
     }
+    else
+        Inst_ID_value = Inst_IF;
     if(isFlushed)
-        Inst_IF = 0x00000000;
+        Inst_ID_value = 0x00000000;
     isFlushed = false; // Reset the Branch Flag
-    Decode(Inst_IF);
+    Decode(Inst_ID_value);
 
     /* Stall Condition */
     if( rs == EX_rd || rt == EX_rd || rs == DM_rd || rt == DM_rd )
@@ -230,33 +235,55 @@ void Stage_ID()
 
     /* Fowarding */
     Read_Reg();
+    /* rs rt Fowarding*/
     if ( Inst_DM == "ADD"  || Inst_DM == "ADDU"  || Inst_DM == "SUB"  ||
          Inst_DM == "AND"  || Inst_DM == "OR"    || Inst_DM == "XOR"  ||
          Inst_DM == "NOR"  || Inst_DM == "NAND"  || Inst_DM == "SLT"  ||
-         Inst_DM == "SLL"  || Inst_DM == "SRL"   || Inst_DM == "SRA"  ||
-         Inst_DM == "ADD"  || Inst_DM == "MFHI"  || Inst_DM == "MFLO" ||
-         Inst_DM == "ADDI" || Inst_DM == "ADDIU" || Inst_DM == "LUI"  ||
-         Inst_DM == "ANDI" || Inst_DM == "ORI"   || Inst_DM == "NORI" ||
-         Inst_DM == "SLTI" || Inst_DM == "JAL")
+         Inst_DM == "MULT" || Inst_DM == "MULTU" || Inst_DM == "BEQ"  ||
+         Inst_DM == "BNE"  || Inst_DM == "BGTZ"  )
     {
         /* Fowarding */
         stringstream srs, srt;
         srs << rs;
-        srs << rt;
+        srt << rt;
+
         if( DM_rd == rs )
         {
             ID_rs_value = DM_ALU_outcome;
-            ID_info = ID_info + "fwd_EX-DM_rs_$" + srs.str();
+            ID_info = ID_info + " fwd_EX-DM_rs_$" + srs.str();
         }
         if( DM_rd == rt)
         {
             ID_rt_value = DM_ALU_outcome;
-            ID_info = ID_info + "fwd_EX-DM_rt_$" + srt.str();
+            ID_info = ID_info + " fwd_EX-DM_rt_$" + srt.str();
+        }
+    }
+    /* rt Fowarding */
+    if( Inst_DM == "SLL"  || Inst_DM == "SRL"   || Inst_DM == "SRA" )
+    {
+        stringstream srt;
+        srt << rt;
+        if( DM_rd == rt)
+        {
+            ID_rt_value = DM_ALU_outcome;
+            ID_info = ID_info + " fwd_EX-DM_rt_$" + srt.str();
+        }
+    }
+    /* rs Fowarding */
+    if( Inst_DM == "ADDI" || Inst_DM == "ADDIU" || Inst_DM == "LUI"  ||
+        Inst_DM == "ANDI" || Inst_DM == "ORI"   || Inst_DM == "NORI" ||
+        Inst_DM == "SLTI" || Inst_DM == "JAL"   || Inst_DM == "J" )
+    {
+        stringstream srs;
+        srs << rs;
+        if( DM_rd == rs )
+        {
+            ID_rs_value = DM_ALU_outcome;
+            ID_info = ID_info + " fwd_EX-DM_rs_$" + srs.str();
         }
     }
     if( Inst_ID == "BEQ" )
     {
-
         if ( ID_rs_value == ID_rt_value )
         {
             IF_info = " to_be_flushed";
@@ -310,13 +337,20 @@ void Stage_ID()
 
 void Stage_IF()
 {
+    if(isIFStoped)
+    {
+        isIFStoped = false;
+        return;
+    }
     if(isIFStalled)
     {
-        return;
+        //cout << IF_PC << endl;
         isIFStalled = false;
+        isIFStoped = true;
     }
+    // cout << IF_PC << endl;
     IF_PC = PC.cur;
-    Inst_IF = inst_mem[PC.cur];
+    Inst_IF = inst_mem[PC.cur/4];
     PC.cur = PC.cur+4;
     if(isFlushed)
         PC.cur = ID_PC;
