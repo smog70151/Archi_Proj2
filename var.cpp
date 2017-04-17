@@ -7,6 +7,9 @@
 
 using namespace std;
 
+//memory addr
+unsigned int addr;
+
 //output file
 fstream snapshot;    // snapshot.rpt
 fstream error_dump;  // error_dump.rpt
@@ -40,3 +43,38 @@ int simmediate; //signed immediate 16 -> 32
 //Error
 int error_halt; //D memory OVF or Misaligned occur
 bool flag_OVW; //to detect HI, LO OVW
+
+/* Pipeline addition */
+// Each stage Instruction
+unsigned int Inst_IF;
+string Inst_ID;
+string Inst_EX;
+string Inst_DM;
+string Inst_WB;
+
+// Stage WB
+int WB_rd;
+
+// Stage DM
+int DM_ALU_outcome;
+int DM_Memory_data;
+int DM_PC; //to overwrite reg[31] ( Instruction = "jal")
+int DM_HI, DM_LO;
+int DM_rd;
+
+// Stage EX
+int EX_ALU_outcome;
+int EX_PC;
+int EX_rd;
+int EX_rt;
+int ALU_rs_value, ALU_rt_value;
+
+// Stage ID
+int ID_rd;
+int ID_rs_value, ID_rt_value;
+int ID_PC;
+bool isIDStalled;
+bool isFlushed;
+
+// Stage IF
+bool isIFStalled;

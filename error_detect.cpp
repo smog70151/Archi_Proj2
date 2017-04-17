@@ -12,72 +12,88 @@ using namespace std;
 //detect Register[0]
 void Error_R0()
 {
-    reg[0].cur = 0; // reset the Register[0]
-    switch(opcode)
+
+    if( WB_rd == 0 )
     {
-    case 0x00 :
-        if( rd==0 )
-            error_dump <<  "In cycle " << dec << cyc << ": Write $0 Error" << endl;
-    break;
-    default :
-        if( rt==0 )
-            error_dump <<  "In cycle " << dec << cyc << ": Write $0 Error" << endl;
-    break;
+        reg[0].cur = 0; // reset the Register[0]
+        error_dump <<  "In cycle " << dec << cyc << ": Write $0 Error" << endl;
     }
 }
 
 //detect addition OVF
-void Error_OVF()
+void Error_OVF(string inst)
 {
-    switch( opcode )
+    if( inst == "ADD" )
     {
-    /*R-type Instruction OVF detect*/
-    case 0x00 :
-        switch( funct )
-        {
-        case 0x20 : //add
-            if( read_data1 >= 0 && read_data2 >= 0 && (read_data1+read_data2) < 0 )
-                error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
-            if( read_data1 < 0 && read_data2 < 0 && (read_data1+read_data2) >= 0 )
-                error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
-        break;
-        case 0x22 : //sub
-            if( read_data1 >=0 && (~read_data2+1) >= 0 && (read_data1-read_data2) < 0 )
-                error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
-            if( read_data1 < 0 && (~read_data2+1) < 0 && (read_data1-read_data2) >= 0)
-                error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
-        break;
-        default :
-        break;
-        }
-    break;
-
-    /*I-type Instruction OVF detect*/
-    case 0x08 : //addi
-	case 0x23 : //lw
-	case 0x21 : //lh
-	case 0x25 : //lhu
-	case 0x20 : //lb
-	case 0x24 : //lbu
-	case 0x2b : //sw
-	case 0x29 : //sh
-	case 0x28 : //sb
-	    if( read_data1 >= 0 && simmediate >= 0 && (read_data1+simmediate) < 0 )
+        if( ALU_rs_value >= 0 && ALU_rt_value >= 0 && EX_ALU_outcome < 0 )
             error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
-        if( read_data1 < 0 && simmediate < 0 && (read_data1+simmediate) >= 0 )
+        if( ALU_rs_value < 0 && ALU_rt_value < 0 && EX_ALU_outcome >= 0 )
             error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
-    break;
-
-    /*I-type Instruction OVF detect (PC+4+4*simmediate)*/
-    case 0x04 : //beq
-	case 0x05 : //bne
-	case 0x07 : //bgtz
-    break;
-
-    /*Default part*/
-    default :
-    break;
     }
+    else if ( inst == "SUB" )
+    {
+        if( ALU_rs_value >= 0 && (~ALU_rt_value+1) >= 0 && EX_ALU_outcome < 0 )
+            error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
+        if( ALU_rs_value < 0 && (~ALU_rt_value+1) < 0 && EX_ALU_outcome >= 0 )
+            error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
+    }
+    else if ( inst == "ADDI" || inst == "LW" || inst == "LH" || inst == "LHU" ||
+              inst == "LB"   || inst == "LBU"|| inst == "SW" || inst == "SH"  || inst == "SW" )
+    {
+        if( ALU_rs_value >= 0 && simmediate >= 0 && EX_ALU_outcome < 0 )
+            error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
+        if( ALU_rs_value < 0 && simmediate < 0 && EX_ALU_outcome >= 0 )
+            error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
+    }
+    // switch( opcode )
+    // {
+    // /*R-type Instruction OVF detect*/
+    // case 0x00 :
+    //     switch( funct )
+    //     {
+    //     case 0x20 : //add
+    //         if( read_data1 >= 0 && read_data2 >= 0 && (read_data1+read_data2) < 0 )
+    //             error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
+    //         if( read_data1 < 0 && read_data2 < 0 && (read_data1+read_data2) >= 0 )
+    //             error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
+    //     break;
+    //     case 0x22 : //sub
+    //         if( read_data1 >=0 && (~read_data2+1) >= 0 && (read_data1-read_data2) < 0 )
+    //             error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
+    //         if( read_data1 < 0 && (~read_data2+1) < 0 && (read_data1-read_data2) >= 0)
+    //             error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
+    //     break;
+    //     default :
+    //     break;
+    //     }
+    // break;
+    //
+    // /*I-type Instruction OVF detect*/
+    // case 0x08 : //addi
+	// case 0x23 : //lw
+	// case 0x21 : //lh
+	// case 0x25 : //lhu
+	// case 0x20 : //lb
+	// case 0x24 : //lbu
+	// case 0x2b : //sw
+	// case 0x29 : //sh
+	// case 0x28 : //sb
+	//     if( read_data1 >= 0 && simmediate >= 0 && (read_data1+simmediate) < 0 )
+    //         error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
+    //     if( read_data1 < 0 && simmediate < 0 && (read_data1+simmediate) >= 0 )
+    //         error_dump << "In cycle " << dec << cyc << ": Number Overflow" << endl;
+    // break;
+    //
+    // /*I-type Instruction OVF detect (PC+4+4*simmediate)*/
+    // case 0x04 : //beq
+	// case 0x05 : //bne
+	// case 0x07 : //bgtz
+    // break;
+    //
+    // /*Default part*/
+    // default :
+    // break;
+    // }
 }
 
 //detect HI, LO OVW
@@ -89,78 +105,60 @@ void Error_OVW()
 }
 
 //detect D-memory boundary
-void Error_Dmem(int addr)
+void Error_Dmem(string inst,int err_addr)
 {
-    switch(opcode)
+    /* Word */
+    if ( inst == "LW" || inst == "SW" )
     {
-
-    /* word */
-    case 0x23 : //lw
-    case 0x2b : //sw
-        if( 0 > addr || addr > 1020 )
+        if( 0 > err_addr || err_addr > 1020 )
         {
             error_dump <<  "In cycle " << dec << cyc << ": Address Overflow" << endl;
             error_halt = 1 ; //Switch the Error Flag
         }
-    break;
-
-    /* half word */
-	case 0x21 : //lh
-	case 0x25 : //lhu
-    case 0x29 : //sh
-        if( 0 > addr || addr > 1022 )
+    }
+    /* Half Word */
+    if ( inst == "LH" || inst == "LHU" || inst == "SH" )
+    {
+        if( 0 > err_addr || err_addr > 1022 )
         {
             error_dump <<  "In cycle " << dec << cyc << ": Address Overflow" << endl;
             error_halt = 1 ; //Switch the Error Flag
         }
-    break;
-
-    /* byte */
-	case 0x20 : //lb
-	case 0x24 : //lbu
-	case 0x28 : //sb
-	    if( 0 > addr || addr > 1023 )
+    }
+    /* Byte */
+    if ( inst == "LB" || inst =="LBU" || inst == "SB" )
+    {
+        if( 0 > err_addr || err_addr > 1023 )
         {
             error_dump <<  "In cycle " << dec << cyc << ": Address Overflow" << endl;
             error_halt = 1 ; //Switch the Error Flag
         }
-    break;
     }
 }
 
 //detect D-memory misaligned
-void Error_Misaligned(int addr)
+void Error_Misaligned(string inst,int err_addr)
 {
-    switch(opcode)
+    /* Word */
+    if ( inst == "LW" || inst == "SW" )
     {
-
-    /* word */
-    case 0x23 : //lw
-    case 0x2b : //sw
-        if( addr % 4 != 0 )
+        if( err_addr % 4 != 0 )
         {
             error_dump <<  "In cycle " << dec << cyc << ": Misalignment Error" << endl;
             error_halt = 1 ; //Switch the Error Flag
         }
-    break;
-
-    /* half word */
-	case 0x21 : //lh
-	case 0x25 : //lhu
-    case 0x29 : //sh
-        if( addr % 2 != 0 )
-        {
-            error_dump <<  "In cycle " << dec << cyc << ": Misalignment Error" << endl;
-            error_halt = 1 ; //Switch the Error Flag
-        }
-    break;
-
-    /* byte */
-	case 0x20 : //lb
-	case 0x24 : //lbu
-	case 0x28 : //sb
-    break;
     }
+    /* Half Word */
+    if ( inst == "LH" || inst == "LHU" || inst == "SH" )
+    {
+        if( err_addr % 2 != 0 )
+        {
+            error_dump <<  "In cycle " << dec << cyc << ": Misalignment Error" << endl;
+            error_halt = 1 ; //Switch the Error Flag
+        }
+    }
+    /* byte */
+    // Won't Misaligned
 }
 
 //detect instructions ( mfhi and mflo )

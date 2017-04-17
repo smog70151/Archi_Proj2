@@ -14,6 +14,3 @@ void Read_Reg();
 
 // Write the data into register
 void Write_Reg();
-
-// Signed immediate(16 Bits)
-void Signed();

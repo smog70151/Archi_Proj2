@@ -5,8 +5,10 @@
 #ifndef VAR_H
 #define VAR_H
 
-
 using namespace std;
+
+//memory addr
+extern unsigned int addr;
 
 //output file
 extern fstream snapshot;    // snapshot.rpt
@@ -46,5 +48,44 @@ extern int simmediate; //signed immediate 16 -> 32
 //Error
 extern int error_halt; //D memory OVF or Misaligned occur
 extern bool flag_OVW; //to detect HI, LO OVW
+
+/* Pipeline addition */
+// Each stage Instruction
+extern unsigned int Inst_IF;
+extern string Inst_ID;
+extern string Inst_EX;
+extern string Inst_DM;
+extern string Inst_WB;
+
+// Stage WB
+extern int WB_rd;
+
+// Stage DM
+extern int DM_ALU_outcome;
+extern int DM_Memory_data;
+extern int DM_PC; //to overwrite reg[31] ( Instruction = "jal")
+extern int DM_HI, DM_LO;
+extern int DM_rd;
+
+// Stage EX
+extern int EX_ALU_outcome;
+extern int EX_PC;
+extern int EX_rd;
+extern int EX_rt;
+int ALU_rs_value, ALU_rt_value;
+
+// Stage ID
+extern int ID_rd;
+extern int ID_rs_value, ID_rt_value;
+extern bool isIDStalled;
+extern bool isFlushed;
+
+// Stage IF
+extern bool isIFStalled;
+
+// String to detect stall / flush / foward
+extern string IF_info;
+extern string ID_info;
+extern string EX_info;
 
 #endif // VAR_H

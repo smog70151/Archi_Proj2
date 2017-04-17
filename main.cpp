@@ -14,6 +14,8 @@
 #include "alu.h"
 // to detect the error
 #include "error_detect.h"
+// to implement each stage
+#include "stage.h"
 
 using namespace std;
 
@@ -30,7 +32,7 @@ void Snapshot();
 
 int main()
 {
-    unsigned int addr;
+    std::ios_base::sync_with_stdio(false);
     //Init var
     init();
     //read *.bin
@@ -40,15 +42,25 @@ int main()
     //simulation part
     while(1)
     {
-        if(error_halt==1) break; //error detect 1.halt 2.error
+
+        // addr = PC.cur/4 ; //load instruction memory
+        // PC_ALU(); //PC = PC+4 -> next instruction
+        // Decode(inst_mem[addr]); //Decode current instruction
+        // Read_Reg(); //Read the red data and signed immediate( simmediate )
+        // ALU(); //Implement the instruction meaning
+        Stage_WB();
+        Stage_DM();
+        Stage_EX();
+        Stage_ID();
+        Stage_IF();
+        // halt
+        // Error
+        // 5 Halt instruction
+        if(error_halt==1) break;
+        if( (Inst_IF & 0xfc000000 == 0xfc000000) && Inst_WB == HALT && Inst_DM == HALT && Inst_EX == HALT && Inst_ID == HALT) break;
         Snapshot();
-        if(cyc==500001 || PC.cur > 1023) break; //cyc > 500,000
+        if(cyc==500001 || PC.cur > 1023) break; // cyc > 500,000 || PC addr OVF
         cyc++; //cycle ++;
-        addr = PC.cur/4 ; //load instruction memory
-        PC_ALU(); //PC = PC+4 -> next instruction
-        Decode(inst_mem[addr]); //Decode current instruction
-        Read_Reg(); //Read the red data and signed immediate( simmediate )
-        ALU(); //Implement the instruction meaning
     }
 
     //close *.rpt
@@ -61,7 +73,7 @@ void init()
 {
     //Init i-part and d-part mem
     for(int i=0; i<256; i++)
-        data_mem[i] = 0;
+        inst_mem[i] = 0;
     for(int i=0; i<1024; i++)
         data_mem[i] = 0;
     //Init HI, LO, PC ;
@@ -169,11 +181,11 @@ void read_dimage()
 		//store mem
 		unsigned int addr = 4*(count - temp);
 		if(addr+3>1023)
-        {
-            cout << "illegal testcase" << endl;
-            error_halt = 1;
-            break;
-        }
+    {
+        cout << "illegal testcase" << endl;
+        error_halt = 1;
+        break;
+    }
 		data_mem[addr]   = (data&0xff000000)>>24;
 		data_mem[addr+1] = (data&0x00ff0000)>>16;
 		data_mem[addr+2] = (data&0x0000ff00)>>8 ;
@@ -223,6 +235,11 @@ void Snapshot()
         if(PC.pre!=PC.cur)
             snapshot << "PC: 0x" << setw(8) << setfill('0') << hex << uppercase << PC.cur << endl;
     }
+    snapshot << "IF: 0x" << setw(8) << setfill('0') << hex << uppercase << Inst_IF << endl;
+    snapshot << "ID: " << Inst_ID << endl;
+    snapshot << "EX: " << Inst_EX << endl;
+    snapshot << "DM: " << Inst_DM << endl;
+    snapshot << "WB: " << Inst_WB << endl;
     snapshot << endl << endl;
     //update the Register
     for(int i = 0; i<32 ; i++)
