@@ -81,3 +81,9 @@ bool isFlushed;
 
 // Stage IF
 bool isIFStalled;
+int IF_PC;
+
+// String to detect stall / flush / foward
+string IF_info;
+string ID_info;
+string EX_info;

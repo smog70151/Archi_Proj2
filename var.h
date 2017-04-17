@@ -75,16 +75,18 @@ extern int EX_ALU_outcome;
 extern int EX_PC;
 extern int EX_rd;
 extern int EX_rt;
-int ALU_rs_value, ALU_rt_value;
+extern int ALU_rs_value, ALU_rt_value;
 
 // Stage ID
 extern int ID_rd;
 extern int ID_rs_value, ID_rt_value;
 extern bool isIDStalled;
 extern bool isFlushed;
+extern int ID_PC;
 
 // Stage IF
 extern bool isIFStalled;
+extern int IF_PC;
 
 // String to detect stall / flush / foward
 extern string IF_info;

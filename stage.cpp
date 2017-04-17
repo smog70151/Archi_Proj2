@@ -165,7 +165,7 @@ void Stage_EX()
          Inst_DM == "SLTI" || Inst_DM == "JAL")
     {
         /* Fowarding */
-        sstream srs, srt;
+        stringstream srs, srt;
         srs << rs;
         srt << rt;
         if( DM_rd == rs )
@@ -240,13 +240,13 @@ void Stage_ID()
          Inst_DM == "SLTI" || Inst_DM == "JAL")
     {
         /* Fowarding */
-        sstream srs, srt;
+        stringstream srs, srt;
         srs << rs;
         srs << rt;
         if( DM_rd == rs )
         {
             ID_rs_value = DM_ALU_outcome;
-            ID_info = ID_info + "fwd_EX-DM_rs_$" + srs.str(); 
+            ID_info = ID_info + "fwd_EX-DM_rs_$" + srs.str();
         }
         if( DM_rd == rt)
         {
@@ -313,7 +313,7 @@ void Stage_IF()
     if(isIFStalled)
     {
         return;
-        isStalled = false;
+        isIFStalled = false;
     }
     IF_PC = PC.cur;
     Inst_IF = inst_mem[PC.cur];

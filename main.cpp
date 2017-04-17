@@ -57,7 +57,7 @@ int main()
         // Error
         // 5 Halt instruction
         if(error_halt==1) break;
-        if(((Inst_IF&0xfc000000)==0xfc000000) && Inst_WB == HALT && Inst_DM == HALT && Inst_EX == HALT && Inst_ID == HALT) break;
+        if(((Inst_IF&0xfc000000)==0xfc000000) && Inst_WB == "HALT" && Inst_DM == "HALT" && Inst_EX == "HALT" && Inst_ID == "HALT") break;
         Snapshot();
         if(cyc==500001 || PC.cur > 1023) break; // cyc > 500,000 || PC addr OVF
         cyc++; //cycle ++;
