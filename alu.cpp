@@ -315,8 +315,8 @@ void R_multu()
     //{Hi || Lo} = $s * $t (unsigned, no overflow exception)
     unsigned long long temp_rs, temp_rt;
     /* Extension rs, rt */
-    temp_rs = read_data1 & 0x00000000ffffffff;
-    temp_rt = read_data2 & 0x00000000ffffffff;
+    temp_rs = ALU_rs_value & 0x00000000ffffffff;
+    temp_rt = ALU_rt_value & 0x00000000ffffffff;
 
     HI.cur = (temp_rs*temp_rt) >> 32;
     LO.cur = (temp_rs*temp_rt) & 0x00000000ffffffff;
@@ -326,6 +326,7 @@ void R_multu()
 /* Only rd */
 void R_mfhi()
 {
+    Flag_OVW();
     //$d = Hi
     // reg[rd].cur = HI.cur;
     // Error_R0(); //detect Write Register[0]
@@ -333,6 +334,7 @@ void R_mfhi()
 }
 void R_mflo()
 {
+    Flag_OVW();
     //$d = Lo
     // reg[rd].cur = LO.cur;
     // Error_R0(); //detect Write Register[0]
@@ -534,7 +536,8 @@ void J_j()
 }
 void J_jal()
 {
-    EX_PC = IF_PC + 4;
+    // if (cyc==5) cout << " Program Counter : "<< setw(8) << setfill('0') << hex << ID_PC << endl;
+    EX_ALU_outcome = EX_PC + 4;
     // PC.cur = ( PC.cur >> 27 ) | ( immediate << 2 );
 }
 /* J-Type Instructions */

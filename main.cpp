@@ -33,6 +33,7 @@ void Snapshot();
 int main()
 {
     std::ios_base::sync_with_stdio(false);
+    std::cin.tie(0);
     //Init var
     init();
     //read *.bin
@@ -56,13 +57,12 @@ int main()
         // halt
         // Error
         // 5 Halt instruction
-        if(error_halt==1) break;
         Snapshot();
-        if(((Inst_IF&0xfc000000)==0xfc000000) && Inst_WB == "HALT" && Inst_DM == "HALT" && Inst_EX == "HALT" && Inst_ID == "HALT") break;
-        if(cyc==500001 || PC.cur > 1023) break; // cyc > 500,000 || PC addr OVF
+        if(error_halt==1) break;
+        if(((Inst_IF&0xfc000000)==0xfc000000) && (Inst_WB == "HALT") && (Inst_DM == "HALT") && (Inst_EX == "HALT") && (Inst_ID == "HALT")) break;
+        if(cyc==120 || PC.cur > 1023) break; // cyc > 500,000 || PC addr OVF
         cyc++; //cycle ++;
     }
-
     //close *.rpt
     snapshot.close();
     error_dump.close();
@@ -81,7 +81,7 @@ void init()
     HI.cur = LO.cur = PC.cur = 0;
     //Init Register
     for(int i=0; i<32; i++)
-        reg[i].cur = reg[i].pre = 0;
+        reg[i].cur = reg[i].pts = reg[i].pre = 0;
     //Init cyc
     cyc = 0;
     //Init Error halt detect
@@ -90,6 +90,7 @@ void init()
     //Init inst
     Inst_WB = Inst_DM = Inst_EX = Inst_ID = "NOP";
     Inst_IF = 0x00000000;
+    isIDStalled = false;
 
     snapshot.open("snapshot.rpt",ios::out);
     error_dump.open("error_dump.rpt",ios::out);
@@ -225,6 +226,7 @@ void Snapshot()
         snapshot << "$HI: 0x" << setw(8) << setfill('0') << hex << uppercase << HI.cur << endl;
         snapshot << "$LO: 0x" << setw(8) << setfill('0') << hex << uppercase << LO.cur << endl;
         snapshot << "PC: 0x" << setw(8) << setfill('0') << hex << uppercase << IF_PC << endl;
+        reg[29].pre = reg[29].pts = reg[29].cur;
     }
     else //snapshot every cyc
     {
@@ -232,24 +234,28 @@ void Snapshot()
         // cout << "$" << setw(2) << setfill('0') << dec << "2" << ": 0x" << setw(8) << setfill('0') << hex << uppercase << reg[2].cur << endl;
         // cout << "$" << setw(2) << setfill('0') << dec << "2" << ": 0x" << setw(8) << setfill('0') << hex << uppercase << reg[2].pre << endl;
         for(int i = 0; i<32; i++)
-            if(reg[i].pre != reg[i].cur)
-                snapshot << "$" << setw(2) << setfill('0') << dec << i << ": 0x" << setw(8) << setfill('0') << hex << uppercase << reg[i].cur << endl;
-        if(HI.pre!=HI.cur)
-            snapshot << "$HI: 0x" << setw(8) << setfill('0') << hex << uppercase << HI.cur << endl;
-        if(LO.pre!=LO.cur)
-            snapshot << "$LO: 0x" << setw(8) << setfill('0') << hex << uppercase << LO.cur << endl;
+            if(reg[i].pre != reg[i].pts)
+                snapshot << "$" << setw(2) << setfill('0') << dec << i << ": 0x" << setw(8) << setfill('0') << hex << uppercase << reg[i].pts << endl;
+        if(HI.pre!=HI.pts)
+            snapshot << "$HI: 0x" << setw(8) << setfill('0') << hex << uppercase << HI.pts << endl;
+        if(LO.pre!=LO.pts)
+            snapshot << "$LO: 0x" << setw(8) << setfill('0') << hex << uppercase << LO.pts << endl;
             snapshot << "PC: 0x" << setw(8) << setfill('0') << hex << uppercase << IF_PC << endl;
     }
     snapshot << "IF: 0x" << setw(8) << setfill('0') << hex << uppercase << Inst_IF << IF_info << endl;
     snapshot << "ID: " << Inst_ID << ID_info << endl;
-    snapshot << "EX: " << Inst_EX << EX_info << endl;
+    snapshot << "EX: " << Inst_EX << EX_sinfo << EX_tinfo << endl;
     snapshot << "DM: " << Inst_DM << endl;
     snapshot << "WB: " << Inst_WB << endl;
     snapshot << endl << endl;
     //update the Register
     for(int i = 0; i<32 ; i++)
-        reg[i].pre = reg[i].cur;
-    HI.pre = HI.cur;
-    LO.pre = LO.cur;
+        reg[i].pre = reg[i].pts;
+    for(int i = 0; i<32 ; i++)
+        reg[i].pts = reg[i].cur;
+    HI.pre = HI.pts;
+    HI.pts = HI.cur;
+    LO.pre = LO.pts;
+    LO.pts = LO.cur;
     PC.pre = PC.cur;
 }
