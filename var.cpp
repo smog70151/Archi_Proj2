@@ -61,6 +61,7 @@ int WB_Forward_data;
 // Stage DM
 int DM_ALU_outcome;
 int DM_Memory_data;
+int DM_Forward_data;
 int DM_PC; //to overwrite reg[31] ( Instruction = "jal")
 int DM_HI, DM_LO;
 int DM_rd;
@@ -71,11 +72,15 @@ int EX_PC;
 int EX_rd;
 int EX_rt;
 int ALU_rs_value, ALU_rt_value;
+bool isRSForwarded, isRTForwarded;
 
 // Stage ID
 int ID_rd;
 int ID_rs_value, ID_rt_value;
 int ID_PC;
+int Branch;
+int Branch_q;
+bool isBranch;
 bool isIDStalled;
 bool isFlushed;
 unsigned int Inst_ID_value;
@@ -88,4 +93,5 @@ int IF_PC;
 // String to detect stall / flush / foward
 string IF_info;
 string ID_info;
-string EX_info;
+string EX_sinfo;
+string EX_tinfo;

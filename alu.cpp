@@ -207,6 +207,7 @@ void R_add()
 {
     //$d = $s + $t
     EX_ALU_outcome = ALU_rs_value + ALU_rt_value;
+    // if(cyc==40) cout << " ALU_rs_value : "<< setw(8) << setfill('0') << hex << ALU_rs_value << endl;
     // Error_R0(); //detect Write Register[0]
     Error_OVF(Inst_EX); //detect Adder OVF
 }
@@ -296,7 +297,7 @@ void R_jr()
 void R_mult()
 {
     //{Hi || Lo} = $s * $t
-    unsigned long long temp_rs, temp_rt;
+    long long temp_rs, temp_rt;
     /* Extension signed rs, rt */
     if(ALU_rs_value &0x80000000)
         temp_rs = ALU_rs_value | 0xffffffff00000000;
@@ -307,6 +308,7 @@ void R_mult()
     else
         temp_rt = ALU_rt_value & 0x00000000ffffffff;
     HI.cur = (temp_rs*temp_rt) >> 32;
+    // cout << " HI.cur : "<< setw(8) << setfill('0') << hex << HI.cur << endl;
     LO.cur = (temp_rs*temp_rt) & 0x00000000ffffffff;
     Error_OVW(); //detect OVW HI, LO
 }
@@ -315,8 +317,8 @@ void R_multu()
     //{Hi || Lo} = $s * $t (unsigned, no overflow exception)
     unsigned long long temp_rs, temp_rt;
     /* Extension rs, rt */
-    temp_rs = read_data1 & 0x00000000ffffffff;
-    temp_rt = read_data2 & 0x00000000ffffffff;
+    temp_rs = ALU_rs_value & 0x00000000ffffffff;
+    temp_rt = ALU_rt_value & 0x00000000ffffffff;
 
     HI.cur = (temp_rs*temp_rt) >> 32;
     LO.cur = (temp_rs*temp_rt) & 0x00000000ffffffff;
@@ -326,6 +328,7 @@ void R_multu()
 /* Only rd */
 void R_mfhi()
 {
+    Flag_OVW();
     //$d = Hi
     // reg[rd].cur = HI.cur;
     // Error_R0(); //detect Write Register[0]
@@ -333,6 +336,7 @@ void R_mfhi()
 }
 void R_mflo()
 {
+    Flag_OVW();
     //$d = Lo
     // reg[rd].cur = LO.cur;
     // Error_R0(); //detect Write Register[0]
@@ -534,7 +538,8 @@ void J_j()
 }
 void J_jal()
 {
-    EX_PC = IF_PC + 4;
+    // if (cyc==5) cout << " Program Counter : "<< setw(8) << setfill('0') << hex << ID_PC << endl;
+    EX_ALU_outcome = EX_PC + 4;
     // PC.cur = ( PC.cur >> 27 ) | ( immediate << 2 );
 }
 /* J-Type Instructions */

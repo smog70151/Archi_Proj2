@@ -22,6 +22,7 @@ extern fstream dimage;      // read dimage
 typedef struct Register {
     int pre;
     int cur;
+    int pts;
 } Register;
 
 extern Register reg[32];
@@ -66,6 +67,7 @@ extern int WB_Forward_data;
 // Stage DM
 extern int DM_ALU_outcome;
 extern int DM_Memory_data;
+extern int DM_Forward_data;
 extern int DM_PC; //to overwrite reg[31] ( Instruction = "jal")
 extern int DM_HI, DM_LO;
 extern int DM_rd;
@@ -76,12 +78,16 @@ extern int EX_PC;
 extern int EX_rd;
 extern int EX_rt;
 extern int ALU_rs_value, ALU_rt_value;
+extern bool isRSForwarded, isRTForwarded;
 
 // Stage ID
 extern int ID_rd;
 extern int ID_rs_value, ID_rt_value;
 extern bool isIDStalled;
 extern bool isFlushed;
+extern int Branch;
+extern int Branch_q;
+extern bool isBranch;
 extern int ID_PC;
 extern unsigned int Inst_ID_value;
 
@@ -93,6 +99,7 @@ extern int IF_PC;
 // String to detect stall / flush / foward
 extern string IF_info;
 extern string ID_info;
-extern string EX_info;
+extern string EX_sinfo;
+extern string EX_tinfo;
 
 #endif // VAR_H

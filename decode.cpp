@@ -69,7 +69,7 @@ void Decode(unsigned int inst)
         break;
         case 0x00 : //sll $d,$t,C
             Inst_ID = "SLL";
-            if ( rt == 0 && rs == 0 )
+            if ( rt == 0 && rd == 0 && shamt == 0 )
                 Inst_ID = "NOP";
             ID_rd = rd;
         break;
@@ -112,18 +112,23 @@ void Decode(unsigned int inst)
     break;
     case 0x23 : //lw $t,C($s)
         Inst_ID = "LW";
+        ID_rd = rt;
     break;
     case 0x21 : //lh $t,C($s)
         Inst_ID = "LH";
+        ID_rd = rt;
     break;
     case 0x25 : //lhu $t,C($s)
         Inst_ID = "LHU";
+        ID_rd = rt;
     break;
     case 0x20 : //lb $t,C($s)
         Inst_ID = "LB";
+        ID_rd = rt;
     break;
     case 0x24 : //lbu $t,C($s)
         Inst_ID = "LBU";
+        ID_rd = rt;
     break;
     case 0x2b : //sw $t,C($s)
         Inst_ID = "SW";
@@ -163,6 +168,7 @@ void Decode(unsigned int inst)
     break;
     case 0x03 : //jal C
         Inst_ID = "JAL";
+        ID_rd = 31;
     break;
     case 0x3f : //halt
         Inst_ID = "HALT";
